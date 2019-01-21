@@ -23,6 +23,8 @@ module Music
       method, *params = input.split(/(".*?"|\S+)/).reject { |argument| argument.delete('"').strip.empty? }
       params.each { |param| param.delete!('"') }
 
+      return if method.nil?
+
       begin
         send(method, *params)
       rescue NoMethodError
