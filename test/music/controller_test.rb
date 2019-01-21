@@ -9,6 +9,12 @@ class TestController < MiniTest::Test
     @album4 = build_mock_album('The Blueprint', 'Jay-Z', false)
   end
 
+  def build_show_mock(albums, unplayed = false, artist = nil)
+    show_mock = MiniTest::Mock.new
+    show_mock.expect :call, albums, [{unplayed_only: unplayed, artist_name: artist}]
+    show_mock
+  end
+
   def test_add_album
     album_title = 'Sticky Fingers'
     artist_name = 'Rolling Stones'
@@ -63,8 +69,7 @@ class TestController < MiniTest::Test
 \"Licensed to Ill\" by Beastie Boys (unplayed)\n\
 \"The Black Album\" by Jay-Z (played)\n\
 \"The Blueprint\" by Jay-Z (unplayed)\n"
-    show_mock = MiniTest::Mock.new
-    show_mock.expect :call, albums, [{unplayed_only: false, artist_name: nil}]
+    show_mock = build_show_mock(albums, false, nil)
 
     message = @controller.library.stub :list_albums, show_mock do
       @controller.send(:show, 'all')
@@ -77,8 +82,7 @@ class TestController < MiniTest::Test
   def test_show_albums_unplayed
     albums = [@album2, @album4]
     expected_message = "\"Licensed to Ill\" by Beastie Boys \n\"The Blueprint\" by Jay-Z \n"
-    show_mock = MiniTest::Mock.new
-    show_mock.expect :call, albums, [{unplayed_only: true, artist_name: nil}]
+    show_mock = build_show_mock(albums, true, nil)
 
     message = @controller.library.stub :list_albums, show_mock do
       @controller.send(:show, 'unplayed')
@@ -91,8 +95,7 @@ class TestController < MiniTest::Test
   def test_show_albums_artist
     albums = [@album3, @album4]
     expected_message = "\"The Black Album\" by Jay-Z (played)\n\"The Blueprint\" by Jay-Z (unplayed)\n"
-    show_mock = MiniTest::Mock.new
-    show_mock.expect :call, albums, [{unplayed_only: false, artist_name: 'Jay-Z'}]
+    show_mock = build_show_mock(albums, false, 'Jay-Z')
 
     message = @controller.library.stub :list_albums, show_mock do
       @controller.send(:show, 'all', 'by', 'Jay-Z')
@@ -105,8 +108,7 @@ class TestController < MiniTest::Test
   def test_show_albums_artist_unplayed
     albums = [@album2]
     expected_message = "\"Licensed to Ill\" by Beastie Boys \n"
-    show_mock = MiniTest::Mock.new
-    show_mock.expect :call, albums, [{unplayed_only: true, artist_name: 'Beastie Boys'}]
+    show_mock = build_show_mock(albums, true, 'Beastie Boys')
 
     message = @controller.library.stub :list_albums, show_mock do
       @controller.send(:show, 'unplayed', 'by', 'Beastie Boys')
